@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Mon compt'heures</title>
+
+  <link rel="manifest" href="manifest.json">
+  <meta id="theme-color-meta" name="theme-color" content="#EEF0E7">
+
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="masthead">
+      <div class="masthead-top">
+        <div class="brand">
+          Mon compt'heures
+          <small>compteur horaire</small>
+        </div>
+
+        <button type="button" class="icon-btn" id="open-settings" aria-label="Réglages">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="period-row">
+        <button type="button" class="period-nav" id="prev-month" aria-label="Mois précédent">‹</button>
+
+        <div class="period-picker">
+          <select id="month-select" aria-label="Mois"></select>
+          <input id="year-input" type="number" min="1970" max="2200" aria-label="Année">
+        </div>
+
+        <button type="button" class="period-nav" id="next-month" aria-label="Mois suivant">›</button>
+      </div>
+
+      <div class="meter">
+        <div style="flex:1;">
+          <div class="meter-label" id="period-label"></div>
+          <div class="meter-window" id="meter-window"></div>
+          <div class="goal-line" id="goal-line"></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="day-list" id="day-list"></main>
+  </div>
+
+  <div class="overlay" id="settings-overlay">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <button type="button" class="sheet-close" id="close-settings" aria-label="Fermer">×</button>
+      <h2>Réglages</h2>
+
+      <h3>Thème</h3>
+      <div class="theme-list">
+        <button type="button" class="theme-option" data-theme="auto">
+          <span class="theme-swatch carnet-clair"></span>
+          <span class="theme-name">Auto<br>suit le tél.</span>
+        </button>
+
+        <button type="button" class="theme-option" data-theme="carnet-clair">
+          <span class="theme-swatch carnet-clair"></span>
+          <span class="theme-name">Carnet<br>clair</span>
+        </button>
+
+        <button type="button" class="theme-option" data-theme="carnet-sombre">
+          <span class="theme-swatch carnet-sombre"></span>
+          <span class="theme-name">Carnet<br>sombre</span>
+        </button>
+
+        <button type="button" class="theme-option" data-theme="atelier">
+          <span class="theme-swatch atelier"></span>
+          <span class="theme-name">Atelier<br>sombre, ambre</span>
+        </button>
+
+        <button type="button" class="theme-option" data-theme="grille">
+          <span class="theme-swatch grille"></span>
+          <span class="theme-name">Papier<br>quadrillé</span>
+        </button>
+      </div>
+
+      <h3>Mode de saisie</h3>
+      <div class="seg seg-inputmode">
+        <button type="button" data-v="direct">Nombre d'heures</button>
+        <button type="button" data-v="shift">Début - fin</button>
+      </div>
+
+      <h3>Affichage des heures</h3>
+      <div class="seg seg-format">
+        <button type="button" data-v="decimal">Décimal (7,5)</button>
+        <button type="button" data-v="hm">Heures:min (7h30)</button>
+      </div>
+      <p class="hint">
+        S'applique au compteur, au CSV, au PDF — et, en saisie « Nombre d'heures », au type de champ (texte ou horloge).
+      </p>
+
+      <h3>Objectif hebdomadaire</h3>
+      <div class="field-row">
+        <label for="weekly-goal">Heures par semaine</label>
+        <input id="weekly-goal" type="number" inputmode="decimal" min="0" step="0.5">
+        <span class="unit">h</span>
+      </div>
+      <p class="hint">
+        Laissez vide pour ne rien afficher. L'objectif du mois est calculé au prorata du nombre de jours du mois affiché.
+      </p>
+
+      <h3>Sauvegarde</h3>
+
+      <div class="export-row">
+        <span class="export-label">Mois affiché — CSV</span>
+
+        <button type="button" class="icon-action" id="export-month" aria-label="Télécharger le CSV du mois affiché" title="Télécharger">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+        </button>
+
+        <button type="button" class="icon-action" id="share-month-csv" aria-label="Partager le CSV du mois affiché" title="Partager">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="18" cy="5" r="3"></circle>
+            <circle cx="6" cy="12" r="3"></circle>
+            <circle cx="18" cy="19" r="3"></circle>
+            <line x1="8.59" y1="10.51" x2="15.42" y2="6.49"></line>
+            <line x1="8.59" y1="13.49" x2="15.42" y2="17.51"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="export-row">
+        <span class="export-label">Toutes les données — CSV</span>
+
+        <button type="button" class="icon-action" id="export-all" aria-label="Télécharger le CSV complet" title="Télécharger">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+        </button>
+
+        <button type="button" class="icon-action" id="share-all-csv" aria-label="Partager le CSV complet" title="Partager">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="18" cy="5" r="3"></circle>
+            <circle cx="6" cy="12" r="3"></circle>
+            <circle cx="18" cy="19" r="3"></circle>
+            <line x1="8.59" y1="10.51" x2="15.42" y2="6.49"></line>
+            <line x1="8.59" y1="13.49" x2="15.42" y2="17.51"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="export-row">
+        <span class="export-label">Importer un fichier CSV</span>
+
+        <button type="button" class="icon-action" id="import-btn" aria-label="Importer un fichier CSV" title="Importer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+        </button>
+      </div>
+
+      <input type="file" id="import-file" accept=".csv,text/csv">
+
+      <p class="hint">
+        L'import fusionne les données du fichier avec celles déjà enregistrées : les jours présents dans le fichier remplacent les jours correspondants déjà saisis.
+      </p>
+
+      <div class="export-row">
+        <span class="export-label">Mois affiché — PDF</span>
+
+        <button type="button" class="icon-action" id="export-pdf" aria-label="Télécharger le PDF du mois affiché" title="Télécharger">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+        </button>
+
+        <button type="button" class="icon-action" id="share-pdf" aria-label="Partager le PDF du mois affiché" title="Partager">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="18" cy="5" r="3"></circle>
+            <circle cx="6" cy="12" r="3"></circle>
+            <circle cx="18" cy="19" r="3"></circle>
+            <line x1="8.59" y1="10.51" x2="15.42" y2="6.49"></line>
+            <line x1="8.59" y1="13.49" x2="15.42" y2="17.51"></line>
+          </svg>
+        </button>
+      </div>
+
+      <p class="hint">
+        Le bouton « Partager » ouvre le menu habituel du téléphone (WhatsApp, e-mail, Drive...) pour envoyer directement le fichier ; « Télécharger » l'enregistre sur l'appareil.
+      </p>
+
+      <h3>Import planning Excel</h3>
+
+      <div class="export-row">
+        <span class="export-label">Importer un planning Excel</span>
+
+        <button type="button" class="icon-action" id="import-excel-btn" aria-label="Importer un planning Excel" title="Importer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+        </button>
+      </div>
+
+      <input type="file" id="import-excel-file" accept=".xls,.xlsx">
+      <p class="hint" id="current-employee-hint"></p>
+
+      <h3>Table de correspondance des postes</h3>
+      <p class="hint">
+        Les codes commençant par « 9 » sont automatiquement considérés comme repos, sauf si des horaires sont saisis.
+      </p>
+
+      <div id="shifts-table"></div>
+
+      <div class="btn-row">
+        <button type="button" class="action-btn" id="add-shift-btn">Ajouter</button>
+        <button type="button" class="action-btn" id="export-shifts-btn">Exporter</button>
+        <button type="button" class="action-btn" id="import-shifts-btn">Importer</button>
+      </div>
+
+      <input type="file" id="import-shifts-file" accept=".json,application/json">
+
+      <h3>Données</h3>
+      <button type="button" class="action-btn danger" id="reset-data">Réinitialiser toutes les données</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="employee-modal-overlay">
+    <div class="sheet" style="max-width:480px;">
+      <div class="sheet-handle"></div>
+      <h2>Importer un planning Excel</h2>
+      <p class="hint" id="employee-modal-hint"></p>
+
+      <div class="field-row" style="margin-bottom:10px;">
+        <label for="employee-modal-select">Salarié</label>
+        <select id="employee-modal-select"></select>
+      </div>
+
+      <div class="field-row" style="margin-bottom:10px;">
+        <label for="employee-modal-month">Mois</label>
+        <select id="employee-modal-month"></select>
+      </div>
+
+      <div class="field-row" style="margin-bottom:10px;">
+        <label for="employee-modal-year">Année</label>
+        <input id="employee-modal-year" type="number" min="1970" max="2200" style="width:100px; border:1.5px solid var(--line-strong); background:var(--surface); color:var(--ink); border-radius:var(--radius-s); padding:8px;">
+      </div>
+
+      <label class="checkbox-row">
+        <input type="checkbox" id="employee-modal-remember" checked>
+        Mémoriser ce salarié sur cet appareil
+      </label>
+
+      <div class="btn-row">
+        <button type="button" class="action-btn" id="employee-modal-confirm">Continuer</button>
+        <button type="button" class="action-btn" id="employee-modal-cancel">Annuler</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="shift-modal-overlay">
+    <div class="sheet" style="max-width:480px;">
+      <div class="sheet-handle"></div>
+      <h2 id="shift-modal-title">Poste à définir</h2>
+      <p class="hint" id="shift-modal-hint"></p>
+
+      <div class="field-row" style="margin-bottom:10px;">
+        <label>Code du poste</label>
+        <input type="text" id="shift-modal-code" readonly style="width:90px;">
+      </div>
+
+      <div class="field-row" style="margin-bottom:10px;">
+        <label>Début</label>
+        <input type="time" id="shift-modal-start" style="width:110px;">
+      </div>
+
+      <div class="field-row" style="margin-bottom:10px;">
+        <label>Fin</label>
+        <input type="time" id="shift-modal-end" style="width:110px;">
+      </div>
+
+      <div class="btn-row">
+        <button type="button" class="action-btn" id="shift-modal-save">Saisir et valider</button>
+        <button type="button" class="action-btn" id="shift-modal-ignore">Ignorer définitivement</button>
+        <button type="button" class="action-btn" id="shift-modal-skip">Passer</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="preview-modal-overlay">
+    <div class="sheet" style="max-width:560px;">
+      <div class="sheet-handle"></div>
+      <h2 id="preview-modal-title">Aperçu de l'import</h2>
+      <div id="preview-modal-content" style="max-height:50vh; overflow-y:auto; margin-bottom:14px;"></div>
+
+      <div class="btn-row">
+        <button type="button" class="action-btn" id="preview-modal-confirm">Valider l'import</button>
+        <button type="button" class="action-btn" id="preview-modal-cancel">Annuler</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+  <script src="vendor/xlsx.full.min.js"></script>
+  <script>
+    if (!window.XLSX) {
+      document.write('<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"><\/script>');
+    }
+  </script>
+
+  <script src="app.js"></script>
+</body>
+</html>
